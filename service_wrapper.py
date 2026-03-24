@@ -35,7 +35,7 @@ sys.path.append(str(Path(__file__).parent))
 from rag_pipeline import ingest_file, get_collection
 
 # ── Configuration ──────────────────────────────────────────────
-LM_STUDIO_URL = "http://127.0.0.1:1234/v1"
+LM_STUDIO_URL = "http://<IP>:<PORT>/v1"
 LOG_DIR = Path(r"D:\Local\Tools\LM_Studio\logs")
 WATCH_DIR = Path(r"D:\Local")
 PRESET_PATH = Path(r"C:\Users\BinhPhan\.lmstudio\config-presets\021026.preset.json")

@@ -1,7 +1,7 @@
 """
 ╔══════════════════════════════════════════════════════════════════╗
 ║  LM Studio Agentic Client v2.0 — Production Grade               ║
-║  Server : http://127.0.0.1:1234 (OpenAI-compatible)              ║
+║  Server : http://<IP>:<PORT> (OpenAI-compatible)                 ║
 ║  Host   : Dell OptiPlex SFF Plus 7020                            ║
 ║           i7-14700 · 64 GB RAM · CPU-only (--gpu off)            ║
 ║  Engine : llama.cpp via LM Studio 0.4.2                          ║
@@ -48,7 +48,7 @@ except ImportError:
     sys.exit(1)
 
 # ── Configuration ────────────────────────────────────────────────
-LM_STUDIO_BASE_URL = "http://127.0.0.1:1234/v1"
+LM_STUDIO_BASE_URL = "http://<IP>:<PORT>/v1"
 MODEL_ID = "auto"               # "auto" = detect loaded model
 DEFAULT_TEMPERATURE = 0.0       # deterministic for precision
 DEFAULT_MAX_TOKENS = 4096       # room for thinking models

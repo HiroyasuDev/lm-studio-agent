@@ -36,7 +36,7 @@ except ImportError:
 # ── Configuration ────────────────────────────────────────────
 CHROMA_DIR = Path(r"D:\Local\Tools\LM_Studio\knowledge_base")
 COLLECTION_NAME = "local_knowledge"
-EMBEDDING_URL = "http://127.0.0.1:1234/v1/embeddings"
+EMBEDDING_URL = "http://<IP>:<PORT>/v1/embeddings"
 EMBEDDING_MODEL = "text-embedding-nomic-embed-text-v1.5"
 CHUNK_TOKENS = 512      # Precise cl100k_base tokens per chunk
 MAX_RESULTS = 5         # default search results

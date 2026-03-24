@@ -36,7 +36,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("router")
 
-BASE_URL = "http://127.0.0.1:1234"
+BASE_URL = "http://<IP>:<PORT>"
 
 # ── Model Tiers ──────────────────────────────────────────────
 MODELS = {
