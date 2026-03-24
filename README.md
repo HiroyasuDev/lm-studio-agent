@@ -34,19 +34,21 @@ A modern orchestration agent built around the **Plan → Execute → Verify** lo
 * **Exponential Backoff:** Gracefully handles tool-call failures with `2s → 4s → 8s` retries.
 * **JSON Output Validation:** Strict schema verification; automatically extracts JSON from model markdown.
 * **Chain-of-Thought Verification:** The model self-evaluates critical answers with a confidence score.
-* **Auto-Pruning Memory:** A sliding context window keeps tokens under budget mapping to the `4096` context size limit.
+* **True BPE Tokenization:** Exact programmatic token arrays via `tiktoken` (`cl100k_base`) guarantee zero context-window overflow during deep RAG retrieval.
+* **Auto-Pruning Memory:** A sliding context window keeps exact tokens strictly mapped to the `4096` inference limit.
 * **MCP Extensible:** Tested flawlessly with 9 MCP servers (Search, Docker, Filesystem, etc).
 
-### 2. ⚡ Smart Model Routing (`smart_router.py`)
-Hardware constraints demand efficiency. The router automatically evaluates the complexity of a prompt using RegEx heuristic classifiers:
+### 2. ⚡ Semantic Vector Routing (`smart_router.py`)
+Hardware constraints demand extreme routing efficiency. The smart router vectorizes incoming prompts via `nomic-embed-text-v1.5` and mathematically computes **Cosine Similarity** against predefined domain centroids:
 * **FAST Tier (Qwen3-0.6B) @ ~60 tok/s:** *Math, dates, single factoids.*
 * **BALANCED Tier (LFM 1.6B) @ ~35 tok/s:** *Summarizations, lists, medium text.*
 * **QUALITY Tier (Qwen2.5 7B Q6_K) @ ~12 tok/s:** *Complex coding (Python/SAS), step-by-step logic, detailed analysis.*
 * **SSE Streaming:** Yields instant time-to-first-token. 
 
-### 3. 👁️ Live Knowledge Awareness (`rag_pipeline.py`)
+### 3. 👁️ Live Knowledge Awareness & Code-Aware Chunking (`rag_pipeline.py`)
 You shouldn't have to tell your agent what you are working on.
-* **Live Directory Watchdog:** Recursively watches your `Local` directory. When you save a file (`.py`, `.sas`, `.pdf`, `.docx`), the file is automatically ingested in the background.
+* **Live Directory Watchdog:** Recursively watches your `Local` directory. When you save a file (`.py`, `.sas`, `.pdf`, `.docx`), it natively auto-ingests in the background.
+* **Code-Aware AST Chunking:** Eliminates blind paragraph splitting. It maps native Abstract Syntax Trees (`ast.parse`) for Python (`def`/`class`), and enforces strict Procedural RegEx boundaries for SAS files, ensuring complex loops and `PROC SQL` macros are never structurally fragmented.
 * **ChromaDB Vector Store:** Lightweight, persistent vector DB.
 * **Nomic-Embed-Text-v1.5:** Local semantic embedding without API costs.
 
@@ -72,7 +74,7 @@ This stack is currently hyper-optimized for the **Intel Core i7-14700 (Desktop) 
 
 ### Prerequisites
 1. LM Studio running locally with the Server enabled (`0.0.0.0:1234`).
-2. Required python dependencies: `pip install openai chromadb pypdf python-docx watchdog psutil`. 
+2. Required python dependencies: `pip install openai chromadb tiktoken numpy pypdf python-docx watchdog psutil`. 
 
 ### Commands 
 
