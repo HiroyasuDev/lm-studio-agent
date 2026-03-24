@@ -2,8 +2,8 @@
 ╔══════════════════════════════════════════════════════════════════╗
 ║  LM Studio Agentic Client v2.0 — Production Grade               ║
 ║  Server : http://<IP>:<PORT> (OpenAI-compatible)                 ║
-║  Host   : Dell OptiPlex SFF Plus 7020                            ║
-║           i7-14700 · 64 GB RAM · CPU-only (--gpu off)            ║
+║  Host   : <MACHINE_MODEL>                                        ║
+║           <MACHINE_SPECS>                                        ║
 ║  Engine : llama.cpp via LM Studio 0.4.2                          ║
 ║  Updated: 2026-03-24                                             ║
 ╚══════════════════════════════════════════════════════════════════╝
