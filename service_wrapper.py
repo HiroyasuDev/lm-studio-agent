@@ -36,9 +36,9 @@ from rag_pipeline import ingest_file, get_collection
 
 # ── Configuration ──────────────────────────────────────────────
 LM_STUDIO_URL = "http://<IP>:<PORT>/v1"
-LOG_DIR = Path(r"D:\Local\Tools\LM_Studio\logs")
-WATCH_DIR = Path(r"D:\Local")
-PRESET_PATH = Path(r"C:\Users\BinhPhan\.lmstudio\config-presets\021026.preset.json")
+LOG_DIR = Path(r"C:\path\to\your\logs")
+WATCH_DIR = Path(r"C:\path\to\watch\dir")
+PRESET_PATH = Path(r"C:\Users\username\.lmstudio\config-presets\021026.preset.json")
 
 HEALTH_INTERVAL = 30
 CPU_CHECK_INTERVAL = 10

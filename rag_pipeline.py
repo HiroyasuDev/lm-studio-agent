@@ -34,14 +34,14 @@ except ImportError:
     sys.exit(1)
 
 # ── Configuration ────────────────────────────────────────────
-CHROMA_DIR = Path(r"D:\Local\Tools\LM_Studio\knowledge_base")
+CHROMA_DIR = Path(r"C:\path\to\your\knowledge_base")
 COLLECTION_NAME = "local_knowledge"
 EMBEDDING_URL = "http://<IP>:<PORT>/v1/embeddings"
 EMBEDDING_MODEL = "text-embedding-nomic-embed-text-v1.5"
 CHUNK_TOKENS = 512      # Precise cl100k_base tokens per chunk
 MAX_RESULTS = 5         # default search results
 
-LOG_DIR = Path(r"D:\Local\Tools\LM_Studio\logs")
+LOG_DIR = Path(r"C:\path\to\your\logs")
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(

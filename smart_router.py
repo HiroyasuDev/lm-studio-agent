@@ -26,7 +26,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Generator, Optional
 
-LOG_DIR = Path(r"D:\Local\Tools\LM_Studio\logs")
+LOG_DIR = Path(r"C:\path\to\your\logs")
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(

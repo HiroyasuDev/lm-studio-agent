@@ -56,7 +56,7 @@ DEFAULT_TIMEOUT = 120           # seconds (CPU inference is slow)
 MAX_RETRIES = 3
 RETRY_DELAY = 2                 # base seconds (exponential backoff)
 MAX_CONTEXT_TOKENS = 3500       # sliding window threshold (of 4096 ctx)
-LOG_DIR = Path(r"D:\Local\Tools\LM_Studio\logs")
+LOG_DIR = Path(r"C:\path\to\your\logs")
 
 # ── System Prompt (Optimized for Precision + Tool Restraint) ─────
 SYSTEM_PROMPT = (
