@@ -12,6 +12,17 @@ A fully optimized, "10/10" local agentic AI stack designed for CPU inference. Fe
 
 ---
 
+## 🎯 Motivation & Purpose (5W1H)
+
+**Who:** Built for solo developers, researchers, and engineers working under strict local hardware constraints without sacrificing agentic AI capabilities.
+**What:** A hyper-optimized, smart-routing local AI stack equipped with continuous real-time knowledge integration (RAG) and self-healing infrastructure.
+**Where:** Designed specifically for CPU-only inference environments (e.g., standard enterprise workstations lacking discrete GPUs).
+**When:** Created to immediately bypass the latency limitations of running dense 7B models on standard DDR4 memory.
+**Why:** Running local AI on CPU (especially complex agentic reasoning loops) is notoriously slow—often yielding single-digit tokens-per-second. The goal of this project isn't to buy better hardware, but to prove that aggressive software optimization (live background RAG tracking, dynamic thread pinning, and context-aware model routing) can elevate a budget workstation to a "10/10" production-grade AI assistant.
+**How:** Through a synchronized multi-layer Python architecture that wraps LM Studio: parsing complexity to select hyper-fast 0.6B models for simple queries, reserving 7B models for dense code generation, using a watchdog to adjust CPU loads in real-time, and utilizing ChromaDB for zero-latency localized knowledge retrieval.
+
+---
+
 ## 🌟 The "10/10" Architecture
 
 This stack transforms a standard LM Studio installation into a **reliable, self-healing, locally-aware AI agent**.
