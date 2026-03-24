@@ -65,56 +65,54 @@ MODELS = {
 #  Complexity Classifier
 # ═══════════════════════════════════════════════════════════════
 
-# Patterns that indicate complexity
-COMPLEX_PATTERNS = [
-    r'\b(write|create|build|implement|design|develop|refactor)\b.*\b(class|function|module|api|server|database|app)\b',
-    r'\b(debug|fix|optimize|analyze|compare|benchmark)\b',
-    r'\b(explain.*in detail|step by step|comprehensive)\b',
-    r'\b(multi.?step|workflow|pipeline|architecture)\b',
-    r'\bcode\b.*\b(review|generation|completion)\b',
-    r'\b(SAS|Python|JavaScript|SQL|HTML|CSS)\b.*\b(program|script|query)\b',
-]
-
-SIMPLE_PATTERNS = [
-    r'^(what|who|when|where|how much|how many)\b.{0,50}$',
-    r'^(yes|no|true|false|define|translate)\b',
-    r'\b(time|date|weather|convert|calculate)\b.{0,30}$',
-    r'^.{0,40}$',  # very short queries
-]
-
-MEDIUM_PATTERNS = [
-    r'\b(summarize|describe|list|outline|explain)\b',
-    r'\b(search|find|look up)\b',
-    r'^.{40,150}$',  # medium-length queries
-]
-
+# Anchors for Semantic Routing
+FAST_ANCHOR = "what who when where date time weather short define true false fact quick simple calculations"
+BALANCED_ANCHOR = "summarize describe list outline explain middle document lookup search context"
+QUALITY_ANCHOR = "write code implement design architecture python sas javascript sql api logic debug complex workflow pipeline multi-step rationale"
 
 def classify_complexity(query: str) -> str:
-    """Classify query complexity → 'fast', 'balanced', or 'quality'."""
-    q = query.strip().lower()
-
-    # Check for complex patterns first (priority: precision)
-    for pattern in COMPLEX_PATTERNS:
-        if re.search(pattern, q, re.IGNORECASE):
-            return "quality"
-
-    # Check for medium patterns BEFORE simple (summarize > short query)
-    for pattern in MEDIUM_PATTERNS:
-        if re.search(pattern, q, re.IGNORECASE):
-            return "balanced"
-
-    # Check for simple patterns
-    for pattern in SIMPLE_PATTERNS:
-        if re.search(pattern, q, re.IGNORECASE):
-            return "fast"
-
-    # Default: based on length
-    word_count = len(q.split())
-    if word_count <= 8:
-        return "fast"
-    elif word_count <= 25:
-        return "balanced"
-    else:
+    """Classify query using zero-shot semantic routing via embeddings."""
+    try:
+        import numpy as np
+        payload = json.dumps({
+            "model": "text-embedding-nomic-embed-text-v1.5",
+            "input": [query, FAST_ANCHOR, BALANCED_ANCHOR, QUALITY_ANCHOR]
+        }).encode()
+        
+        req = urllib.request.Request(
+            f"{BASE_URL}/v1/embeddings",
+            data=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        resp = json.loads(urllib.request.urlopen(req, timeout=5).read())
+        
+        vecs = [np.array(e["embedding"]) for e in resp["data"]]
+        q_vec = vecs[0]
+        
+        def cos_sim(v1, v2):
+            return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+            
+        scores = {
+            "fast": cos_sim(q_vec, vecs[1]),
+            "balanced": cos_sim(q_vec, vecs[2]),
+            "quality": cos_sim(q_vec, vecs[3])
+        }
+        
+        # Length acts as a minor heuristic weight multiplier
+        word_count = len(query.split())
+        if word_count > 40:
+            scores["quality"] += 0.15
+        elif word_count < 8:
+            scores["fast"] += 0.15
+            
+        best = max(scores, key=scores.get)
+        return best
+        
+    except Exception as e:
+        log.warning("Semantic routing failed (fallback to length rules): %s", e)
+        words = len(query.split())
+        if words <= 10: return "fast"
+        elif words <= 30: return "balanced"
         return "quality"
 
 
@@ -195,9 +193,17 @@ def stream_print(prompt: str, model: str = "auto"):
         total_chars += len(chunk)
 
     elapsed = time.time() - t0
-    est_tokens = int(total_chars / 3.5)
+    try:
+        import tiktoken
+        tokenizer = tiktoken.get_encoding("cl100k_base")
+        est_tokens = len(tokenizer.encode(prompt + " " * int(total_chars)))  # Accurate prompt+response estimation
+        # Alternatively, just estimate completion tokens roughly since stream chunks are bytes
+        est_tokens = int(total_chars / 3.5) 
+    except ImportError:
+        est_tokens = int(total_chars / 3.5)
+
     tok_s = est_tokens / elapsed if elapsed > 0 else 0
-    print(f"\n\n  [{est_tokens} est. tokens, ~{tok_s:.1f} tok/s, {elapsed:.1f}s]")
+    print(f"\n\n  [{est_tokens} tokens, ~{tok_s:.1f} tok/s, {elapsed:.1f}s]")
 
 
 # ═══════════════════════════════════════════════════════════════

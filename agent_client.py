@@ -41,9 +41,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 try:
     from openai import OpenAI
+    import tiktoken
 except ImportError:
-    print("ERROR: 'openai' package not found. Install with:")
-    print("  py -m pip install openai>=1.12.0")
+    print("ERROR: missing packages. Run:")
+    print("  py -m pip install openai>=1.12.0 tiktoken")
     sys.exit(1)
 
 # ── Configuration ────────────────────────────────────────────────
@@ -270,33 +271,50 @@ def deduplicate_tool_calls(
     return unique
 
 
-def estimate_tokens(messages: List[Dict[str, str]]) -> int:
-    """Rough token estimate: ~1.3 tokens per word."""
-    total_chars = sum(len(m.get("content", "")) for m in messages)
-    return int(total_chars / 3.5)  # ~3.5 chars per token
+# Initialize the true tokenizer
+try:
+    TOKENIZER = tiktoken.get_encoding("cl100k_base")
+except Exception:
+    TOKENIZER = None
 
+def count_tokens(text: str) -> int:
+    """Exact token counting using cl100k_base."""
+    if TOKENIZER:
+        try:
+            return len(TOKENIZER.encode(str(text)))
+        except Exception:
+            pass
+    return int(len(str(text)) / 3.5)
+
+def estimate_conversation_tokens(messages: List[Dict[str, str]]) -> int:
+    """Precise token counting for message arrays."""
+    total = 0
+    for m in messages:
+        # 4 tokens overhead per message (role/name/content framing)
+        total += 4 + count_tokens(m.get("content", ""))
+    total += 3  # Assistant reply primmer
+    return total
 
 def prune_conversation(
     messages: List[Dict[str, str]], max_tokens: int = MAX_CONTEXT_TOKENS
 ) -> List[Dict[str, str]]:
-    """Sliding window: keep system prompt + recent messages within budget."""
+    """Sliding window: keep system prompt + exact recent messages within budget."""
     if not messages:
         return messages
 
-    est = estimate_tokens(messages)
-    if est <= max_tokens:
+    if estimate_conversation_tokens(messages) <= max_tokens:
         return messages
 
-    # Always keep system prompt (first message) and last 4 messages
+    # Always keep system prompt (first message) and last 4 interactions
     system = [m for m in messages if m["role"] == "system"]
     non_system = [m for m in messages if m["role"] != "system"]
 
-    while estimate_tokens(system + non_system) > max_tokens and len(non_system) > 4:
+    while estimate_conversation_tokens(system + non_system) > max_tokens and len(non_system) > 4:
         removed = non_system.pop(0)
         log.debug("Pruned message: %s...", removed.get("content", "")[:40])
 
     pruned = system + non_system
-    log.info("Context pruned: %d → %d messages", len(messages), len(pruned))
+    log.info("Context pruned: %d -> %d messages", len(messages), len(pruned))
     return pruned
 
 
@@ -656,8 +674,8 @@ def interactive_mode() -> None:
             print("  History cleared.")
             continue
         if user_input.lower() == "status":
-            est = estimate_tokens(history)
-            print(f"  Messages: {len(history)} | Est. tokens: {est}/{MAX_CONTEXT_TOKENS}")
+            tokens = estimate_conversation_tokens(history)
+            print(f"  Messages: {len(history)} | Exact tokens: {tokens}/{MAX_CONTEXT_TOKENS}")
             continue
         if not user_input:
             continue

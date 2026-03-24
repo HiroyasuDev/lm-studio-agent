@@ -38,8 +38,7 @@ CHROMA_DIR = Path(r"D:\Local\Tools\LM_Studio\knowledge_base")
 COLLECTION_NAME = "local_knowledge"
 EMBEDDING_URL = "http://127.0.0.1:1234/v1/embeddings"
 EMBEDDING_MODEL = "text-embedding-nomic-embed-text-v1.5"
-CHUNK_SIZE = 500        # characters per chunk
-CHUNK_OVERLAP = 50      # overlap between chunks
+CHUNK_TOKENS = 512      # Precise cl100k_base tokens per chunk
 MAX_RESULTS = 5         # default search results
 
 LOG_DIR = Path(r"D:\Local\Tools\LM_Studio\logs")
@@ -120,28 +119,58 @@ def load_document(path: Path) -> Optional[str]:
 #  Text Chunking
 # ═══════════════════════════════════════════════════════════════
 
-def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> List[str]:
-    """Split text into overlapping chunks."""
-    if not text or len(text) < 50:
-        return []
+try:
+    import tiktoken
+    TOKENIZER = tiktoken.get_encoding("cl100k_base")
+except Exception:
+    TOKENIZER = None
 
+def chunk_text(text: str, filename: str = "", chunk_tokens: int = CHUNK_TOKENS) -> List[str]:
+    """Code-aware and semantic token-based chunking."""
+    if not text or not text.strip():
+        return []
+    
+    ext = Path(filename).suffix.lower() if filename else ""
     chunks = []
+    
+    # 1. Code-Aware Chunking (Python AST precision)
+    if ext == ".py":
+        try:
+            import ast
+            tree = ast.parse(text)
+            current_chunk = []
+            for node in tree.body:
+                node_text = ast.get_source_segment(text, node)
+                if node_text:
+                    current_chunk.append(node_text)
+            if current_chunk:
+                return current_chunk
+        except Exception:
+            pass # Syntax error in file, fallback to semantic token chunking
+            
+    # 2. Code-Aware Chunking (SAS procedural boundaries)
+    if ext == ".sas":
+        import re
+        parts = re.split(r'(?i)\n(?=proc |data |%macro )', text)
+        return [p.strip() for p in parts if len(p.strip()) > 20]
+        
+    # 3. True Tokenizer Semantic Chunking (For Markdown, PDF, TXT)
+    if TOKENIZER:
+        tokens = TOKENIZER.encode(text)
+        start = 0
+        while start < len(tokens):
+            end = min(start + chunk_tokens, len(tokens))
+            chunks.append(TOKENIZER.decode(tokens[start:end]))
+            start += chunk_tokens - 50 # 50 token overlap
+        return chunks
+        
+    # 4. Fallback crude character chunking if tiktoken fails
+    char_chunk = int(chunk_tokens * 3.5)
     start = 0
     while start < len(text):
-        end = start + chunk_size
-        # Try to break at sentence boundary
-        if end < len(text):
-            for sep in [". ", ".\n", "\n\n", "\n", " "]:
-                boundary = text.rfind(sep, start + chunk_size // 2, end + 50)
-                if boundary > start:
-                    end = boundary + len(sep)
-                    break
-
-        chunk = text[start:end].strip()
-        if len(chunk) > 30:  # skip tiny chunks
-            chunks.append(chunk)
-        start = end - overlap
-
+        end = start + char_chunk
+        chunks.append(text[start:end].strip())
+        start = end - 150
     return chunks
 
 
@@ -196,7 +225,7 @@ def ingest_file(path: Path, collection) -> int:
     if not text:
         return 0
 
-    chunks = chunk_text(text)
+    chunks = chunk_text(text, filename=path.name)
     if not chunks:
         log.debug("No chunks from: %s", path.name)
         return 0
