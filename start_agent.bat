@@ -1,14 +1,14 @@
 @echo off
 REM ═══════════════════════════════════════════════════════════════
 REM  LM Studio Agent – Quick Start
-REM  Model  : Qwen2.5-1.5B-Instruct (Q4_0 GGUF)
+REM  Model  : <MODEL_NAME>
 REM  Server : http://<IP>:<PORT>
 REM ═══════════════════════════════════════════════════════════════
 
 echo.
 echo  ╔══════════════════════════════════════════════════════════╗
 echo  ║   LM Studio Agent Client                                ║
-echo  ║   Qwen2.5-1.5B-Instruct · OptiPlex 7020                ║
+echo  ║   <MODEL_NAME> · OptiPlex 7020                         ║
 echo  ╚══════════════════════════════════════════════════════════╝
 echo.
 
@@ -19,7 +19,7 @@ if %ERRORLEVEL% NEQ 0 (
     echo      Please start it:
     echo        1. Open LM Studio
     echo        2. Go to the "Developer" tab (left sidebar)
-    echo        3. Load model: Qwen2.5-1.5B-Instruct
+    echo        3. Load model: <MODEL_NAME>
     echo        4. Click "Start Server"
     echo.
     pause
