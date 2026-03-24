@@ -1,0 +1,13 @@
+# LM Studio Agent Tools
+__pycache__/
+*.log
+*.jsonl
+*.tmp
+*.bak
+models_list.txt
+finalized_models.txt
+.lmstudio/
+knowledge_base/
+logs/
+.venv/
+.env
