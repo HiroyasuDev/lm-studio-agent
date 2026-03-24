@@ -1,7 +1,7 @@
 @echo off
 REM ══════════════════════════════════════════════════════════════
-REM  Optimized Model Loader for <MACHINE_MODEL>
-REM  <MACHINE_SPECS>
+REM  Optimized Model Loader for Dell
+REM  i7-14700 (20C/28T) · 64 GB DDR4 · CPU-only
 REM  Priority: Precision > Speed > Tool Calling
 REM ══════════════════════════════════════════════════════════════
 REM  Usage:
