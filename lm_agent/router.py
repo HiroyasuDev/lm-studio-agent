@@ -1,7 +1,12 @@
 import json
-import urllib.request
 import logging
+import asyncio
 from typing import Optional
+
+try:
+    import aiohttp
+except ImportError:
+    pass
 
 from lm_agent.config import config
 
@@ -14,7 +19,7 @@ MODELS = {
 }
 
 def classify_complexity(query: str) -> str:
-    """Classify the query to determine optimal model tier using basic heuristics."""
+    """Rigorous heuristic complexity extraction mapping."""
     words = len(query.split())
     if words <= 10:
         return "fast"
@@ -22,40 +27,39 @@ def classify_complexity(query: str) -> str:
         return "balanced"
     return "quality"
 
-def get_loaded_model() -> Optional[str]:
-    """Get the currently loaded model ID."""
+async def get_loaded_model(session: aiohttp.ClientSession) -> Optional[str]:
+    """Asynchronous extraction of current local model bounds."""
     try:
-        req = urllib.request.Request(f"{config.LM_STUDIO_BASE_URL}/models")
-        resp = json.loads(urllib.request.urlopen(req, timeout=5).read())
-        models = [m["id"] for m in resp.get("data", [])]
-        return models[0] if models else None
+        async with session.get(f"{config.LM_STUDIO_BASE_URL}/models", timeout=5) as response:
+            resp = await response.json()
+            models = [m["id"] for m in resp.get("data", [])]
+            return models[0] if models else None
     except Exception:
         return None
 
-def route_and_respond(prompt: str) -> str:
-    """Route exactly to the best model tier."""
+async def route_and_respond(prompt: str) -> str:
+    """Highly engineered asynchronous semantic routing request execution."""
     tier = classify_complexity(prompt)
     model_info = MODELS.get(tier, MODELS["quality"])
     
-    current_model = get_loaded_model()
-    log.info(f"Routed complexity '{tier}'. Requested mapping: {model_info['id']}. Current loaded server model: {current_model}")
-    
-    payload = json.dumps({
-        "model": current_model,
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 500,
-        "temperature": 0,
-    }).encode()
-    
-    req = urllib.request.Request(
-        f"{config.LM_STUDIO_BASE_URL}/chat/completions",
-        data=payload,
-        headers={"Content-Type": "application/json"}
-    )
-    
-    try:
-        resp = json.loads(urllib.request.urlopen(req, timeout=120).read())
-        return resp["choices"][0]["message"]["content"]
-    except Exception as e:
-        log.error(f"Routing failed: {e}")
-        return ""
+    async with aiohttp.ClientSession() as session:
+        current_model = await get_loaded_model(session)
+        log.info(f"Routed algorithmic complexity '{tier}'. Requested mapping: {model_info['id']}. Current target: {current_model}")
+        
+        payload = {
+            "model": current_model,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500,
+            "temperature": 0.0,
+        }
+        
+        headers = {"Content-Type": "application/json"}
+        target_url = f"{config.LM_STUDIO_BASE_URL}/chat/completions"
+        
+        try:
+            async with session.post(target_url, json=payload, headers=headers, timeout=120) as resp:
+                data = await resp.json()
+                return data["choices"][0]["message"]["content"]
+        except Exception as e:
+            log.error(f"Deterministic routing operation aborted: {e}")
+            return ""

@@ -16,6 +16,7 @@ class Config:
     RETRY_DELAY: int = int(os.getenv("RETRY_DELAY", "2"))
     MAX_CONTEXT_TOKENS: int = int(os.getenv("MAX_CONTEXT_TOKENS", "3500"))
     LOG_DIR: Path = Path(os.getenv("LOG_DIR", "logs"))
+    HF_TOKENIZER_PATH: str = os.getenv("HF_TOKENIZER_PATH", "Qwen/Qwen2.5-Coder-7B-Instruct")
 
 config = Config()
 config.LOG_DIR.mkdir(parents=True, exist_ok=True)
