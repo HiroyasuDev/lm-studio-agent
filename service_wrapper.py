@@ -36,9 +36,18 @@ from rag_pipeline import ingest_file, get_collection
 
 # ── Configuration ──────────────────────────────────────────────
 LM_STUDIO_URL = "http://127.0.0.1:1234/v1"
+<<<<<<< Updated upstream
 LOG_DIR = Path(r"D:\Local\Tools\LM_Studio\logs")
 WATCH_DIR = Path(r"D:\Local")
 PRESET_PATH = Path(r"C:\Users\BinhPhan\.lmstudio\config-presets\021026.preset.json")
+=======
+# Use a logs folder next to this script so it exists and is writable by default
+LOG_DIR = Path(__file__).parent / "logs"
+# Default watch directory (adjust if you prefer a different folder)
+WATCH_DIR = Path(r"D:\Local")
+# Default preset path (user can update to their local preset file)
+PRESET_PATH = Path.home() / ".lmstudio" / "config-presets" / "default.preset.json"
+>>>>>>> Stashed changes
 
 HEALTH_INTERVAL = 30
 CPU_CHECK_INTERVAL = 10
