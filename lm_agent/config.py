@@ -7,7 +7,7 @@ load_dotenv()
 
 @dataclass
 class Config:
-    LM_STUDIO_BASE_URL: str = os.getenv("LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+    LM_STUDIO_BASE_URL: str = os.getenv("LM_STUDIO_BASE_URL", "http://<IP>:<PORT>/v1")
     MODEL_ID: str = os.getenv("MODEL_ID", "auto")
     DEFAULT_TEMPERATURE: float = float(os.getenv("DEFAULT_TEMPERATURE", "0.0"))
     DEFAULT_MAX_TOKENS: int = int(os.getenv("DEFAULT_MAX_TOKENS", "4096"))

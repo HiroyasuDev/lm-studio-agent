@@ -1,0 +1,36 @@
+name: Strict Sanitization Audit
+
+on:
+  push:
+    branches: [ "sanitized" ]
+  pull_request:
+    branches: [ "sanitized" ]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Regex Security Scan
+      run: |
+        echo "Initiating uncompromising regex scan for internal secrets and IPs..."
+        
+        # Define forbidden patterns
+        FORBIDDEN_IP="127\.0\.0\.1"
+        FORBIDDEN_PORT="1234"
+        FORBIDDEN_USER="BinhPhan"
+        FORBIDDEN_PATH="D:\\Local"
+
+        # Exclude this workflow file from the scan to prevent false positives
+        EXCLUDE_FLAG="--exclude=sanitize_audit.yml"
+
+        if grep -r -i -E "($FORBIDDEN_IP|$FORBIDDEN_PORT|$FORBIDDEN_USER|$FORBIDDEN_PATH)" . $EXCLUDE_FLAG ; then
+          echo "::error::SANITIZATION FAILURE. Internal IPs, Ports, or Local Paths detected in the branch."
+          exit 1
+        else
+          echo "Sanitization verified. Branch is perfectly sanitized."
+          exit 0
+        fi
